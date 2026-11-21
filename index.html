@@ -78,14 +78,14 @@
             <div class="colors">
               <label class="color-field">
                 <span>色 1</span>
-                <input id="color-a" type="color" value="#161616" />
-                <input id="hex-a" class="hex" type="text" value="#161616" spellcheck="false" maxlength="7" autocomplete="off" aria-label="色1の16進数" />
+                <input id="color-a" type="color" value="#1d4e89" />
+                <input id="hex-a" class="hex" type="text" value="#1d4e89" spellcheck="false" maxlength="7" autocomplete="off" aria-label="色1の16進数" />
               </label>
               <button type="button" id="swap" class="swap" aria-label="色1と色2を入れ替える">⇄</button>
               <label class="color-field" id="color-b-field">
                 <span>色 2</span>
-                <input id="color-b" type="color" value="#d9d3c7" />
-                <input id="hex-b" class="hex" type="text" value="#d9d3c7" spellcheck="false" maxlength="7" autocomplete="off" aria-label="色2の16進数" />
+                <input id="color-b" type="color" value="#1d4e89" />
+                <input id="hex-b" class="hex" type="text" value="#1d4e89" spellcheck="false" maxlength="7" autocomplete="off" aria-label="色2の16進数" />
               </label>
             </div>
 
@@ -109,19 +109,15 @@
                 <input id="angle" type="number" value="90" step="1" inputmode="numeric" />
                 <span class="unit">°</span>
               </label>
-              <p class="help" id="angle-help">0° のとき、下が色1、上が色2です。角度は時計回りに増えます。</p>
+              <p class="help" id="angle-help">90° で左が色1、右が色2です。両側から中央のガイドに向かって抜けます。角度は時計回りです。</p>
             </div>
 
-            <label class="check">
-              <input id="overlay" type="checkbox" />
-              <span>画像の上に重ねる</span>
-            </label>
             <div class="field-head">
-              <span>不透明度</span>
-              <span id="opacity-readout">45%</span>
+              <span>濃さ</span>
+              <span id="opacity-readout">100%</span>
             </div>
-            <input id="opacity" type="range" min="0" max="100" value="45" aria-label="重ねの不透明度" disabled />
-            <p class="help">背景は常に塗られます。重ねをオンにすると、同じ塗りがフレーム全体に乗ります。</p>
+            <input id="opacity" type="range" min="0" max="100" value="100" aria-label="挟みの濃さ" />
+            <p class="help">端の色が画像の上にせり出します。中央の 670px は色が乗らないので、写真が残ります。</p>
           </section>
         </div>
 

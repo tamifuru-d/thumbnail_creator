@@ -10,6 +10,7 @@ import {
   guideRect,
   imageRect,
   normalizeDegrees,
+  pinchStops,
   scaleToSlider,
   sliderToScale,
   zoomAt,
@@ -79,6 +80,13 @@ test('degrees normalize to a clockwise dial', () => {
   assert.equal(normalizeDegrees(450), 90)
   assert.equal(normalizeDegrees(-90), 270)
   assert.equal(normalizeDegrees(Number.NaN), 0)
+})
+
+test('the pinch fades out exactly at the guide edges', () => {
+  const { start, end } = pinchStops()
+  assert.ok(Math.abs(start * 1280 - 305) < 1e-9)
+  assert.ok(Math.abs(end * 1280 - 975) < 1e-9)
+  assert.ok(start < 0.5 && end > 0.5)
 })
 
 test('gradient endpoints follow CSS angles', () => {

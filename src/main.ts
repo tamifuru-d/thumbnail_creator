@@ -1,4 +1,4 @@
-import { drawFrame, type Paint } from './draw'
+import { drawFrame, FRAME_BASE, type Paint } from './draw'
 import {
   FRAME_H,
   FRAME_W,
@@ -7,8 +7,10 @@ import {
   guideCoverView,
   guideRect,
   normalizeDegrees,
+  pinchStops,
   scaleToSlider,
   sliderToScale,
+  withAlpha,
   zoomAt,
   type View,
 } from './geometry'
@@ -24,17 +26,15 @@ interface EditorState {
   colorA: string
   colorB: string
   angle: number
-  overlay: boolean
-  overlayOpacity: number
+  strength: number
 }
 
 const DEFAULT_PAINT = {
   mode: 'gradient' as const,
-  colorA: '#161616',
-  colorB: '#d9d3c7',
+  colorA: '#1d4e89',
+  colorB: '#1d4e89',
   angle: 90,
-  overlay: false,
-  overlayOpacity: 0.45,
+  strength: 1,
 }
 
 const state: EditorState = {
@@ -72,7 +72,6 @@ const swatch = document.querySelector<HTMLElement>('#swatch')!
 const angleBlock = document.querySelector<HTMLElement>('#angle-block')!
 const dial = document.querySelector<HTMLElement>('#dial')!
 const angleInput = document.querySelector<HTMLInputElement>('#angle')!
-const overlayInput = document.querySelector<HTMLInputElement>('#overlay')!
 const opacityInput = document.querySelector<HTMLInputElement>('#opacity')!
 const opacityReadout = document.querySelector<HTMLElement>('#opacity-readout')!
 const status = document.querySelector<HTMLElement>('#status')!
@@ -157,14 +156,8 @@ angleInput.addEventListener('blur', () => {
   render()
 })
 
-overlayInput.addEventListener('change', () => {
-  state.overlay = overlayInput.checked
-  if (state.overlay && state.overlayOpacity === 0) state.overlayOpacity = DEFAULT_PAINT.overlayOpacity
-  render()
-})
-
 opacityInput.addEventListener('input', () => {
-  state.overlayOpacity = Number(opacityInput.value) / 100
+  state.strength = Number(opacityInput.value) / 100
   render({ skipOpacity: true })
 })
 
@@ -346,8 +339,7 @@ function paint(): Paint {
     colorA: state.colorA,
     colorB: state.colorB,
     angle: state.angle,
-    overlay: state.overlay,
-    overlayOpacity: state.overlayOpacity,
+    strength: state.strength,
   }
 }
 
@@ -402,15 +394,16 @@ function render(flags: { skipScale?: boolean; skipAngle?: boolean; skipOpacity?:
     angleInput.value = Number.isInteger(state.angle) ? String(state.angle) : String(Math.round(state.angle * 100) / 100)
   }
 
-  swatch.style.background = gradient
-    ? `linear-gradient(${state.angle}deg, ${state.colorA}, ${state.colorB})`
-    : state.colorA
+  const { start, end } = pinchStops()
+  swatch.style.backgroundColor = gradient ? FRAME_BASE : state.colorA
+  swatch.style.backgroundImage = gradient
+    ? `linear-gradient(${state.angle}deg, ${state.colorA} 0%, ${withAlpha(state.colorA, 0)} ${start * 100}%, ${withAlpha(state.colorB, 0)} ${end * 100}%, ${state.colorB} 100%)`
+    : 'none'
 
-  overlayInput.checked = state.overlay
   maskInput.checked = state.maskToGuide
-  opacityInput.disabled = !state.overlay
-  if (!flags.skipOpacity) opacityInput.value = String(Math.round(state.overlayOpacity * 100))
-  opacityReadout.textContent = `${Math.round(state.overlayOpacity * 100)}%`
+  opacityInput.disabled = !gradient
+  if (!flags.skipOpacity) opacityInput.value = String(Math.round(state.strength * 100))
+  opacityReadout.textContent = `${Math.round(state.strength * 100)}%`
 }
 
 function exportPng() {

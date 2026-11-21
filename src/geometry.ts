@@ -99,6 +99,25 @@ export function sliderToScale(slider: number): number {
   return Math.exp(min + t * (max - min))
 }
 
+/**
+ * Where a left-right pinch fades out. The clear band is the centered 670px guide,
+ * so at 90° the color is gone exactly at the guide edges.
+ */
+export function pinchStops(): { start: number; end: number } {
+  const margin = (FRAME_W - GUIDE) / 2 / FRAME_W
+  return { start: margin, end: 1 - margin }
+}
+
+/** `#rrggbb` plus an alpha, for canvas stops and the matching CSS gradient. */
+export function withAlpha(hex: string, alpha: number): string {
+  const value = Number.parseInt(hex.slice(1), 16)
+  const r = (value >> 16) & 255
+  const g = (value >> 8) & 255
+  const b = value & 255
+  const a = Math.min(1, Math.max(0, alpha))
+  return `rgba(${r}, ${g}, ${b}, ${a})`
+}
+
 /** Dial and CSS share this range. Rendering itself accepts any finite angle. */
 export function normalizeDegrees(angle: number): number {
   if (!Number.isFinite(angle)) return 0
