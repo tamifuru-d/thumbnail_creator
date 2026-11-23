@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>サムネイル</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2312110f'/%3E%3Crect x='2.5' y='4' width='11' height='8' fill='none' stroke='%23f4f1ea'/%3E%3Cpath d='M6 4v8M10 4v8' stroke='%23f4f1ea'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <section class="stage">
+        <header class="stage-head">
+          <h1>サムネイル</h1>
+          <p id="frame-meta"></p>
+        </header>
+
+        <div class="frame-wrap" id="drop">
+          <canvas id="view" width="1280" height="670" aria-label="サムネイルのプレビュー"></canvas>
+          <div class="guide" id="guide" aria-hidden="true">
+            <span id="guide-label"></span>
+          </div>
+          <div class="hint" id="hint">
+            <div class="hint-card">
+              <p>画像をドロップ</p>
+              <p>またはクリックして選ぶ</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="stage-note">ドラッグで移動、ホイールで拡大。ガイド線は書き出しに含まれません。</p>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-body">
+          <section class="section">
+            <h2>画像</h2>
+            <label class="file-btn">
+              画像を選ぶ
+              <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif" />
+            </label>
+            <div class="file-row">
+              <p id="file-name">未選択</p>
+              <button type="button" id="clear" disabled>外す</button>
+            </div>
+
+            <div class="field-head">
+              <span>拡大</span>
+              <span id="scale-readout">100%</span>
+            </div>
+            <input id="scale" type="range" min="0" max="1000" value="500" aria-label="拡大率" disabled />
+
+            <div class="pair">
+              <button type="button" id="fit-frame" disabled>フレームに合わせる</button>
+              <button type="button" id="fit-guide" disabled>ガイドに合わせる</button>
+            </div>
+
+            <label class="check">
+              <input id="mask" type="checkbox" />
+              <span>ガイドでマスク</span>
+            </label>
+            <p class="help" id="mask-help"></p>
+
+            <div class="field-head">
+              <span>画像の不透明度</span>
+              <span id="image-opacity-readout">80%</span>
+            </div>
+            <input id="image-opacity" type="range" min="0" max="100" value="80" aria-label="画像の不透明度" />
+            <p class="help">80% で写真が少し透けて、背景色が混ざります。100% で写真はそのままです。</p>
+          </section>
+
+          <section class="section">
+            <h2>背景</h2>
+            <div class="bg-row">
+              <label class="color-field">
+                <span>背景色</span>
+                <input id="background" type="color" value="#12110f" />
+                <input id="hex-bg" class="hex" type="text" value="#12110f" spellcheck="false" maxlength="7" autocomplete="off" aria-label="背景色の16進数" />
+              </label>
+              <button type="button" id="preset-bg-olive" class="preset">
+                <span class="preset-chips" aria-hidden="true">
+                  <i style="background:#66722F"></i>
+                </span>
+                オリーブ
+              </button>
+            </div>
+            <p class="help">ブランドガイドのオリーブは #66722F です。写真の下に敷きます。</p>
+          </section>
+
+          <section class="section">
+            <h2>塗り</h2>
+            <div class="segmented" role="radiogroup" aria-label="塗りの種類">
+              <label>
+                <input type="radio" name="mode" value="solid" />
+                単色
+              </label>
+              <label>
+                <input type="radio" name="mode" value="gradient" checked />
+                グラデーション
+              </label>
+            </div>
+
+            <div class="presets" role="group" aria-label="プリセット">
+              <button type="button" id="preset-olive" class="preset">
+                <span class="preset-chips" aria-hidden="true">
+                  <i style="background:#66722F"></i>
+                  <i style="background:#3A4219"></i>
+                </span>
+                オリーブ
+              </button>
+            </div>
+            <p class="help">左が #66722F、右が #3A4219、背景も #66722F になります。</p>
+
+            <div class="colors">
+              <label class="color-field">
+                <span>色 1</span>
+                <input id="color-a" type="color" value="#1d4e89" />
+                <input id="hex-a" class="hex" type="text" value="#1d4e89" spellcheck="false" maxlength="7" autocomplete="off" aria-label="色1の16進数" />
+              </label>
+              <button type="button" id="swap" class="swap" aria-label="色1と色2を入れ替える">⇄</button>
+              <label class="color-field" id="color-b-field">
+                <span>色 2</span>
+                <input id="color-b" type="color" value="#1d4e89" />
+                <input id="hex-b" class="hex" type="text" value="#1d4e89" spellcheck="false" maxlength="7" autocomplete="off" aria-label="色2の16進数" />
+              </label>
+            </div>
+
+            <div class="swatch" id="swatch" aria-hidden="true"></div>
+
+            <div class="angle-block" id="angle-block">
+              <div
+                class="dial"
+                id="dial"
+                role="slider"
+                tabindex="0"
+                aria-label="グラデーションの角度"
+                aria-valuemin="0"
+                aria-valuemax="359"
+                aria-valuenow="135"
+                style="--angle: 135deg"
+              >
+                <span class="dial-rotor"></span>
+              </div>
+              <label class="angle-field">
+                <span>角度</span>
+                <input id="angle" type="number" value="135" step="1" inputmode="numeric" />
+                <span class="unit">°</span>
+              </label>
+              <p class="help" id="angle-help">90° で左が色1、右が色2です。両側から中央のガイドに向かって抜けます。角度は時計回りです。</p>
+            </div>
+
+            <div class="field-head">
+              <span>せり出し</span>
+              <span id="reach-readout">450px</span>
+            </div>
+            <input id="reach" type="range" min="0" max="640" value="450" aria-label="せり出す長さ" />
+            <label class="reach-field">
+              <input id="reach-px" type="number" min="0" max="640" value="450" step="1" inputmode="numeric" aria-label="せり出す長さ（px）" />
+              <span>px</span>
+            </label>
+            <p class="help">90° では、端からこの長さまで色が入ります。305px でガイドの端です。</p>
+
+            <div class="field-head">
+              <span>透過率</span>
+              <span id="opacity-readout">100%</span>
+            </div>
+            <input id="opacity" type="range" min="0" max="100" value="100" aria-label="端の色の透過率" />
+            <p class="help">0% で端の色はそのまま、100% で色が消えます。</p>
+          </section>
+        </div>
+
+        <div class="panel-foot">
+          <label class="save-name">
+            <span>ファイル名</span>
+            <input id="save-name" type="text" value="thumbnail-1280x670" spellcheck="false" autocomplete="off" aria-label="保存するファイル名" />
+            <span class="ext">.png</span>
+          </label>
+          <p id="status" class="status" role="status"></p>
+          <button type="button" id="export" class="primary">PNGを保存</button>
+          <button type="button" id="reset" class="quiet">初期状態に戻す</button>
+        </div>
+      </aside>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
