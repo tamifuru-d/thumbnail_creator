@@ -1,4 +1,6 @@
 import { drawFrame, FRAME_BASE, type Paint } from './draw'
+import { DEFAULT_EXPORT_STEM, exportFileName } from './filename'
+import { OLIVE_PRESET } from './presets'
 import {
   FRAME_H,
   FRAME_W,
@@ -27,6 +29,7 @@ interface EditorState {
   colorB: string
   angle: number
   strength: number
+  saveName: string
 }
 
 const DEFAULT_PAINT = {
@@ -45,6 +48,7 @@ const state: EditorState = {
   view: frameCoverView(),
   maskToGuide: false,
   ...DEFAULT_PAINT,
+  saveName: DEFAULT_EXPORT_STEM,
 }
 
 const view = document.querySelector<HTMLCanvasElement>('#view')!
@@ -75,6 +79,8 @@ const angleInput = document.querySelector<HTMLInputElement>('#angle')!
 const opacityInput = document.querySelector<HTMLInputElement>('#opacity')!
 const opacityReadout = document.querySelector<HTMLElement>('#opacity-readout')!
 const status = document.querySelector<HTMLElement>('#status')!
+const presetOlive = document.querySelector<HTMLButtonElement>('#preset-olive')!
+const saveNameInput = document.querySelector<HTMLInputElement>('#save-name')!
 const exportButton = document.querySelector<HTMLButtonElement>('#export')!
 const resetButton = document.querySelector<HTMLButtonElement>('#reset')!
 
@@ -161,10 +167,24 @@ opacityInput.addEventListener('input', () => {
   render({ skipOpacity: true })
 })
 
+presetOlive.addEventListener('click', () => {
+  state.mode = OLIVE_PRESET.mode
+  state.colorA = OLIVE_PRESET.colorA
+  state.colorB = OLIVE_PRESET.colorB
+  state.angle = OLIVE_PRESET.angle
+  state.strength = OLIVE_PRESET.strength
+  render()
+})
+
+saveNameInput.addEventListener('input', () => {
+  state.saveName = saveNameInput.value
+})
+
 exportButton.addEventListener('click', exportPng)
 resetButton.addEventListener('click', () => {
   clearImage()
   Object.assign(state, DEFAULT_PAINT)
+  state.saveName = DEFAULT_EXPORT_STEM
   state.view = frameCoverView()
   state.maskToGuide = false
   setStatus('')
@@ -404,6 +424,14 @@ function render(flags: { skipScale?: boolean; skipAngle?: boolean; skipOpacity?:
   opacityInput.disabled = !gradient
   if (!flags.skipOpacity) opacityInput.value = String(Math.round(state.strength * 100))
   opacityReadout.textContent = `${Math.round(state.strength * 100)}%`
+
+  const olive =
+    state.mode === OLIVE_PRESET.mode &&
+    state.colorA === OLIVE_PRESET.colorA &&
+    state.colorB === OLIVE_PRESET.colorB
+  presetOlive.classList.toggle('is-selected', olive)
+  presetOlive.setAttribute('aria-pressed', olive ? 'true' : 'false')
+  if (document.activeElement !== saveNameInput) saveNameInput.value = state.saveName
 }
 
 function exportPng() {
@@ -424,7 +452,7 @@ function exportPng() {
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `thumbnail-${FRAME_W}x${FRAME_H}.png`
+    link.download = exportFileName(state.saveName)
     link.click()
     URL.revokeObjectURL(url)
     setStatus('')

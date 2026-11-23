@@ -166,6 +166,33 @@ canvas {
   border-top: 1px solid var(--line);
 }
 
+.save-name {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.save-name span:first-child {
+  grid-column: 1 / -1;
+  color: var(--muted);
+}
+
+.save-name input {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--ink);
+}
+
+.save-name .ext { color: var(--muted); }
+
 .section + .section {
   margin-top: 22px;
   padding-top: 22px;
@@ -338,6 +365,44 @@ button:disabled {
   outline: 2px solid var(--ink);
   outline-offset: -2px;
 }
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.preset {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.preset.is-selected {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.preset-chips {
+  display: flex;
+}
+
+.preset-chips i {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.preset-chips i:first-child { border-radius: 2px 0 0 2px; }
+.preset-chips i:last-child { border-radius: 0 2px 2px 0; }
 
 .colors {
   display: grid;

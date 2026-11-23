@@ -75,6 +75,17 @@
               </label>
             </div>
 
+            <div class="presets" role="group" aria-label="プリセット">
+              <button type="button" id="preset-olive" class="preset">
+                <span class="preset-chips" aria-hidden="true">
+                  <i style="background:#66722F"></i>
+                  <i style="background:#3A4219"></i>
+                </span>
+                オリーブ
+              </button>
+            </div>
+            <p class="help">ブランドガイドのオリーブベース。左が #66722F、右が #3A4219 です。</p>
+
             <div class="colors">
               <label class="color-field">
                 <span>色 1</span>
@@ -122,6 +133,11 @@
         </div>
 
         <div class="panel-foot">
+          <label class="save-name">
+            <span>ファイル名</span>
+            <input id="save-name" type="text" value="thumbnail-1280x670" spellcheck="false" autocomplete="off" aria-label="保存するファイル名" />
+            <span class="ext">.png</span>
+          </label>
           <p id="status" class="status" role="status"></p>
           <button type="button" id="export" class="primary">PNGを保存</button>
           <button type="button" id="reset" class="quiet">初期状態に戻す</button>
