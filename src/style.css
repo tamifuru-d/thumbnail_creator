@@ -366,6 +366,15 @@ button:disabled {
   outline-offset: -2px;
 }
 
+.bg-row {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+}
+
+.bg-row .color-field { flex: 1; }
+.bg-row .preset { margin-bottom: 0; }
+
 .presets {
   display: flex;
   flex-wrap: wrap;

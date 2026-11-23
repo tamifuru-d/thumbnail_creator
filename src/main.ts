@@ -9,7 +9,6 @@ import {
   guideCoverView,
   guideRect,
   normalizeDegrees,
-  REACH_GUIDE,
   REACH_MAX,
   clampReach,
   pinchStops,
@@ -33,6 +32,8 @@ interface EditorState {
   angle: number
   strength: number
   reach: number
+  background: string
+  imageOpacity: number
   saveName: string
 }
 
@@ -40,9 +41,11 @@ const DEFAULT_PAINT = {
   mode: 'gradient' as const,
   colorA: '#1d4e89',
   colorB: '#1d4e89',
-  angle: 90,
-  strength: 1,
-  reach: REACH_GUIDE,
+  angle: 135,
+  strength: 0,
+  reach: 450,
+  background: FRAME_BASE,
+  imageOpacity: 0.8,
 }
 
 const state: EditorState = {
@@ -87,6 +90,11 @@ const reachReadout = document.querySelector<HTMLElement>('#reach-readout')!
 const opacityInput = document.querySelector<HTMLInputElement>('#opacity')!
 const opacityReadout = document.querySelector<HTMLElement>('#opacity-readout')!
 const status = document.querySelector<HTMLElement>('#status')!
+const imageOpacityInput = document.querySelector<HTMLInputElement>('#image-opacity')!
+const imageOpacityReadout = document.querySelector<HTMLElement>('#image-opacity-readout')!
+const backgroundInput = document.querySelector<HTMLInputElement>('#background')!
+const hexBg = document.querySelector<HTMLInputElement>('#hex-bg')!
+const presetBgOlive = document.querySelector<HTMLButtonElement>('#preset-bg-olive')!
 const presetOlive = document.querySelector<HTMLButtonElement>('#preset-olive')!
 const saveNameInput = document.querySelector<HTMLInputElement>('#save-name')!
 const exportButton = document.querySelector<HTMLButtonElement>('#export')!
@@ -184,13 +192,30 @@ reachPxInput.addEventListener('input', () => {
   render({ skipReach: true })
 })
 reachPxInput.addEventListener('blur', () => {
-  if (!Number.isFinite(Number(reachPxInput.value))) state.reach = REACH_GUIDE
+  if (!Number.isFinite(Number(reachPxInput.value))) state.reach = DEFAULT_PAINT.reach
   render()
 })
 
 opacityInput.addEventListener('input', () => {
   state.strength = 1 - Number(opacityInput.value) / 100
   render({ skipOpacity: true })
+})
+
+imageOpacityInput.addEventListener('input', () => {
+  state.imageOpacity = Number(imageOpacityInput.value) / 100
+  render({ skipImageOpacity: true })
+})
+
+backgroundInput.addEventListener('input', () => setBackground(backgroundInput.value))
+hexBg.addEventListener('input', () => {
+  const next = hexBg.value.startsWith('#') ? hexBg.value : `#${hexBg.value}`
+  if (!HEX.test(next)) return
+  setBackground(next)
+})
+hexBg.addEventListener('blur', () => { hexBg.value = state.background })
+
+presetBgOlive.addEventListener('click', () => {
+  setBackground(OLIVE_PRESET.background)
 })
 
 presetOlive.addEventListener('click', () => {
@@ -200,7 +225,7 @@ presetOlive.addEventListener('click', () => {
   state.angle = OLIVE_PRESET.angle
   state.strength = OLIVE_PRESET.strength
   state.reach = OLIVE_PRESET.reach
-  render()
+  setBackground(OLIVE_PRESET.background)
 })
 
 saveNameInput.addEventListener('input', () => {
@@ -335,6 +360,12 @@ function setColor(which: 'A' | 'B', value: string) {
   render()
 }
 
+function setBackground(value: string) {
+  if (!HEX.test(value)) return
+  state.background = value.toLowerCase()
+  render()
+}
+
 function setHex(which: 'A' | 'B', value: string) {
   const next = value.startsWith('#') ? value : `#${value}`
   if (!HEX.test(next)) return
@@ -388,10 +419,12 @@ function paint(): Paint {
     angle: state.angle,
     strength: state.strength,
     reach: state.reach,
+    background: state.background,
+    imageOpacity: state.imageOpacity,
   }
 }
 
-function render(flags: { skipScale?: boolean; skipAngle?: boolean; skipReach?: boolean; skipOpacity?: boolean } = {}) {
+function render(flags: { skipScale?: boolean; skipAngle?: boolean; skipReach?: boolean; skipOpacity?: boolean; skipImageOpacity?: boolean } = {}) {
   const canvas = view
   const dpr = Math.min(2, window.devicePixelRatio || 1)
   const width = Math.round(FRAME_W * dpr)
@@ -444,7 +477,7 @@ function render(flags: { skipScale?: boolean; skipAngle?: boolean; skipReach?: b
 
   const { start, end } = pinchStops(state.reach)
   const edge = gradient ? state.strength : 1
-  swatch.style.backgroundColor = gradient ? FRAME_BASE : state.colorA
+  swatch.style.backgroundColor = gradient ? state.background : state.colorA
   swatch.style.backgroundImage = gradient
     ? `linear-gradient(${state.angle}deg, ${withAlpha(state.colorA, edge)} 0%, ${withAlpha(state.colorA, 0)} ${start * 100}%, ${withAlpha(state.colorB, 0)} ${end * 100}%, ${withAlpha(state.colorB, edge)} 100%)`
     : 'none'
@@ -464,6 +497,14 @@ function render(flags: { skipScale?: boolean; skipAngle?: boolean; skipReach?: b
   opacityInput.disabled = !gradient
   if (!flags.skipOpacity) opacityInput.value = String(Math.round((1 - state.strength) * 100))
   opacityReadout.textContent = `${Math.round((1 - state.strength) * 100)}%`
+
+  if (!flags.skipImageOpacity) imageOpacityInput.value = String(Math.round(state.imageOpacity * 100))
+  imageOpacityReadout.textContent = `${Math.round(state.imageOpacity * 100)}%`
+  backgroundInput.value = state.background
+  if (document.activeElement !== hexBg) hexBg.value = state.background
+  const bgOlive = state.background === OLIVE_PRESET.background
+  presetBgOlive.classList.toggle('is-selected', bgOlive)
+  presetBgOlive.setAttribute('aria-pressed', bgOlive ? 'true' : 'false')
 
   const olive =
     state.mode === OLIVE_PRESET.mode &&

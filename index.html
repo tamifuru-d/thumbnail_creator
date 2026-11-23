@@ -60,6 +60,31 @@
               <span>ガイドでマスク</span>
             </label>
             <p class="help" id="mask-help"></p>
+
+            <div class="field-head">
+              <span>画像の不透明度</span>
+              <span id="image-opacity-readout">80%</span>
+            </div>
+            <input id="image-opacity" type="range" min="0" max="100" value="80" aria-label="画像の不透明度" />
+            <p class="help">80% で写真が少し透けて、背景色が混ざります。100% で写真はそのままです。</p>
+          </section>
+
+          <section class="section">
+            <h2>背景</h2>
+            <div class="bg-row">
+              <label class="color-field">
+                <span>背景色</span>
+                <input id="background" type="color" value="#12110f" />
+                <input id="hex-bg" class="hex" type="text" value="#12110f" spellcheck="false" maxlength="7" autocomplete="off" aria-label="背景色の16進数" />
+              </label>
+              <button type="button" id="preset-bg-olive" class="preset">
+                <span class="preset-chips" aria-hidden="true">
+                  <i style="background:#66722F"></i>
+                </span>
+                オリーブ
+              </button>
+            </div>
+            <p class="help">ブランドガイドのオリーブは #66722F です。写真の下に敷きます。</p>
           </section>
 
           <section class="section">
@@ -84,7 +109,7 @@
                 オリーブ
               </button>
             </div>
-            <p class="help">ブランドガイドのオリーブベース。左が #66722F、右が #3A4219 です。</p>
+            <p class="help">左が #66722F、右が #3A4219、背景も #66722F になります。</p>
 
             <div class="colors">
               <label class="color-field">
@@ -111,13 +136,14 @@
                 aria-label="グラデーションの角度"
                 aria-valuemin="0"
                 aria-valuemax="359"
-                aria-valuenow="90"
+                aria-valuenow="135"
+                style="--angle: 135deg"
               >
                 <span class="dial-rotor"></span>
               </div>
               <label class="angle-field">
                 <span>角度</span>
-                <input id="angle" type="number" value="90" step="1" inputmode="numeric" />
+                <input id="angle" type="number" value="135" step="1" inputmode="numeric" />
                 <span class="unit">°</span>
               </label>
               <p class="help" id="angle-help">90° で左が色1、右が色2です。両側から中央のガイドに向かって抜けます。角度は時計回りです。</p>
@@ -125,20 +151,20 @@
 
             <div class="field-head">
               <span>せり出し</span>
-              <span id="reach-readout">305px</span>
+              <span id="reach-readout">450px</span>
             </div>
-            <input id="reach" type="range" min="0" max="640" value="305" aria-label="せり出す長さ" />
+            <input id="reach" type="range" min="0" max="640" value="450" aria-label="せり出す長さ" />
             <label class="reach-field">
-              <input id="reach-px" type="number" min="0" max="640" value="305" step="1" inputmode="numeric" aria-label="せり出す長さ（px）" />
+              <input id="reach-px" type="number" min="0" max="640" value="450" step="1" inputmode="numeric" aria-label="せり出す長さ（px）" />
               <span>px</span>
             </label>
             <p class="help">90° では、端からこの長さまで色が入ります。305px でガイドの端です。</p>
 
             <div class="field-head">
               <span>透過率</span>
-              <span id="opacity-readout">0%</span>
+              <span id="opacity-readout">100%</span>
             </div>
-            <input id="opacity" type="range" min="0" max="100" value="0" aria-label="端の色の透過率" />
+            <input id="opacity" type="range" min="0" max="100" value="100" aria-label="端の色の透過率" />
             <p class="help">0% で端の色はそのまま、100% で色が消えます。</p>
           </section>
         </div>

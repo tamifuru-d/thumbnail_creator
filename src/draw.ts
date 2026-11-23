@@ -31,6 +31,10 @@ export interface Paint {
   strength: number
   /** How far the color reaches inward from each end, in px at 90°. */
   reach: number
+  /** Ground under the photo. Solid mode paints colorA instead. */
+  background: string
+  /** 0–1 opacity of the photo. 1 leaves the photo unchanged. */
+  imageOpacity: number
 }
 
 export function drawFrame(
@@ -42,12 +46,13 @@ export function drawFrame(
 ): void {
   ctx.save()
   ctx.clearRect(0, 0, FRAME_W, FRAME_H)
-  ctx.fillStyle = paint.mode === 'solid' ? paint.colorA : FRAME_BASE
+  ctx.fillStyle = paint.mode === 'solid' ? paint.colorA : paint.background
   ctx.fillRect(0, 0, FRAME_W, FRAME_H)
 
-  if (image) {
+  if (image && paint.imageOpacity > 0) {
     const rect = imageRect(image.width, image.height, view)
     ctx.save()
+    ctx.globalAlpha = Math.min(1, Math.max(0, paint.imageOpacity))
     if (maskToGuide) {
       const guide = guideRect()
       ctx.beginPath()
