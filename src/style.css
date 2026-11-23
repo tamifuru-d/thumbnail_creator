@@ -546,6 +546,32 @@ button:disabled {
 
 .unit { color: var(--muted); }
 
+.reach-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.reach-field input {
+  width: 76px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--ink);
+  appearance: textfield;
+}
+
+.reach-field input::-webkit-outer-spin-button,
+.reach-field input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
 .is-inactive { opacity: 0.38; }
 
 .status {

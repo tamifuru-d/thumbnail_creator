@@ -9,6 +9,9 @@ import {
   guideCoverView,
   guideRect,
   normalizeDegrees,
+  REACH_GUIDE,
+  REACH_MAX,
+  clampReach,
   pinchStops,
   scaleToSlider,
   sliderToScale,
@@ -29,6 +32,7 @@ interface EditorState {
   colorB: string
   angle: number
   strength: number
+  reach: number
   saveName: string
 }
 
@@ -38,6 +42,7 @@ const DEFAULT_PAINT = {
   colorB: '#1d4e89',
   angle: 90,
   strength: 1,
+  reach: REACH_GUIDE,
 }
 
 const state: EditorState = {
@@ -76,6 +81,9 @@ const swatch = document.querySelector<HTMLElement>('#swatch')!
 const angleBlock = document.querySelector<HTMLElement>('#angle-block')!
 const dial = document.querySelector<HTMLElement>('#dial')!
 const angleInput = document.querySelector<HTMLInputElement>('#angle')!
+const reachInput = document.querySelector<HTMLInputElement>('#reach')!
+const reachPxInput = document.querySelector<HTMLInputElement>('#reach-px')!
+const reachReadout = document.querySelector<HTMLElement>('#reach-readout')!
 const opacityInput = document.querySelector<HTMLInputElement>('#opacity')!
 const opacityReadout = document.querySelector<HTMLElement>('#opacity-readout')!
 const status = document.querySelector<HTMLElement>('#status')!
@@ -162,8 +170,26 @@ angleInput.addEventListener('blur', () => {
   render()
 })
 
+reachInput.addEventListener('input', () => {
+  state.reach = clampReach(Number(reachInput.value))
+  reachPxInput.value = String(Math.round(state.reach))
+  render({ skipReach: true })
+})
+
+reachPxInput.addEventListener('input', () => {
+  const value = Number(reachPxInput.value)
+  if (!Number.isFinite(value)) return
+  state.reach = clampReach(value)
+  reachInput.value = String(Math.round(state.reach))
+  render({ skipReach: true })
+})
+reachPxInput.addEventListener('blur', () => {
+  if (!Number.isFinite(Number(reachPxInput.value))) state.reach = REACH_GUIDE
+  render()
+})
+
 opacityInput.addEventListener('input', () => {
-  state.strength = Number(opacityInput.value) / 100
+  state.strength = 1 - Number(opacityInput.value) / 100
   render({ skipOpacity: true })
 })
 
@@ -173,6 +199,7 @@ presetOlive.addEventListener('click', () => {
   state.colorB = OLIVE_PRESET.colorB
   state.angle = OLIVE_PRESET.angle
   state.strength = OLIVE_PRESET.strength
+  state.reach = OLIVE_PRESET.reach
   render()
 })
 
@@ -360,10 +387,11 @@ function paint(): Paint {
     colorB: state.colorB,
     angle: state.angle,
     strength: state.strength,
+    reach: state.reach,
   }
 }
 
-function render(flags: { skipScale?: boolean; skipAngle?: boolean; skipOpacity?: boolean } = {}) {
+function render(flags: { skipScale?: boolean; skipAngle?: boolean; skipReach?: boolean; skipOpacity?: boolean } = {}) {
   const canvas = view
   const dpr = Math.min(2, window.devicePixelRatio || 1)
   const width = Math.round(FRAME_W * dpr)
@@ -414,16 +442,28 @@ function render(flags: { skipScale?: boolean; skipAngle?: boolean; skipOpacity?:
     angleInput.value = Number.isInteger(state.angle) ? String(state.angle) : String(Math.round(state.angle * 100) / 100)
   }
 
-  const { start, end } = pinchStops()
+  const { start, end } = pinchStops(state.reach)
+  const edge = gradient ? state.strength : 1
   swatch.style.backgroundColor = gradient ? FRAME_BASE : state.colorA
   swatch.style.backgroundImage = gradient
-    ? `linear-gradient(${state.angle}deg, ${state.colorA} 0%, ${withAlpha(state.colorA, 0)} ${start * 100}%, ${withAlpha(state.colorB, 0)} ${end * 100}%, ${state.colorB} 100%)`
+    ? `linear-gradient(${state.angle}deg, ${withAlpha(state.colorA, edge)} 0%, ${withAlpha(state.colorA, 0)} ${start * 100}%, ${withAlpha(state.colorB, 0)} ${end * 100}%, ${withAlpha(state.colorB, edge)} 100%)`
     : 'none'
 
   maskInput.checked = state.maskToGuide
+  reachInput.disabled = !gradient
+  reachPxInput.disabled = !gradient
+  reachInput.max = String(REACH_MAX)
+  reachPxInput.max = String(REACH_MAX)
+  const shownReach = Math.round(state.reach)
+  if (!flags.skipReach) {
+    reachInput.value = String(shownReach)
+    if (document.activeElement !== reachPxInput) reachPxInput.value = String(shownReach)
+  }
+  reachReadout.textContent = `${shownReach}px`
+
   opacityInput.disabled = !gradient
-  if (!flags.skipOpacity) opacityInput.value = String(Math.round(state.strength * 100))
-  opacityReadout.textContent = `${Math.round(state.strength * 100)}%`
+  if (!flags.skipOpacity) opacityInput.value = String(Math.round((1 - state.strength) * 100))
+  opacityReadout.textContent = `${Math.round((1 - state.strength) * 100)}%`
 
   const olive =
     state.mode === OLIVE_PRESET.mode &&

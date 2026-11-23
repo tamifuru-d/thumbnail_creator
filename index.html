@@ -124,11 +124,22 @@
             </div>
 
             <div class="field-head">
-              <span>濃さ</span>
-              <span id="opacity-readout">100%</span>
+              <span>せり出し</span>
+              <span id="reach-readout">305px</span>
             </div>
-            <input id="opacity" type="range" min="0" max="100" value="100" aria-label="挟みの濃さ" />
-            <p class="help">端の色が画像の上にせり出します。中央の 670px は色が乗らないので、写真が残ります。</p>
+            <input id="reach" type="range" min="0" max="640" value="305" aria-label="せり出す長さ" />
+            <label class="reach-field">
+              <input id="reach-px" type="number" min="0" max="640" value="305" step="1" inputmode="numeric" aria-label="せり出す長さ（px）" />
+              <span>px</span>
+            </label>
+            <p class="help">90° では、端からこの長さまで色が入ります。305px でガイドの端です。</p>
+
+            <div class="field-head">
+              <span>透過率</span>
+              <span id="opacity-readout">0%</span>
+            </div>
+            <input id="opacity" type="range" min="0" max="100" value="0" aria-label="端の色の透過率" />
+            <p class="help">0% で端の色はそのまま、100% で色が消えます。</p>
           </section>
         </div>
 

@@ -22,4 +22,5 @@ test('the olive preset uses the brand guide olive and deep olive', () => {
   assert.equal(OLIVE_PRESET.mode, 'gradient')
   assert.equal(OLIVE_PRESET.angle, 90)
   assert.equal(OLIVE_PRESET.strength, 1)
+  assert.equal(OLIVE_PRESET.reach, 305)
 })

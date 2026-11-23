@@ -99,13 +99,25 @@ export function sliderToScale(slider: number): number {
   return Math.exp(min + t * (max - min))
 }
 
+/** How far the side color reaches at 90° when it stops on the guide edge. */
+export const REACH_GUIDE = (FRAME_W - GUIDE) / 2
+
+/** The two sides meet in the middle. Farther than this, the stops would cross. */
+export const REACH_MAX = FRAME_W / 2
+
+export function clampReach(px: number): number {
+  if (!Number.isFinite(px)) return REACH_GUIDE
+  return Math.min(REACH_MAX, Math.max(0, px))
+}
+
 /**
- * Where a left-right pinch fades out. The clear band is the centered 670px guide,
- * so at 90° the color is gone exactly at the guide edges.
+ * Where the pinch fades out, as fractions of the gradient line.
+ * `reachPx` is the distance from each outer end. At 90° that distance is pixels
+ * from the left and right edges, and REACH_GUIDE lands on the guide.
  */
-export function pinchStops(): { start: number; end: number } {
-  const margin = (FRAME_W - GUIDE) / 2 / FRAME_W
-  return { start: margin, end: 1 - margin }
+export function pinchStops(reachPx: number = REACH_GUIDE): { start: number; end: number } {
+  const reach = clampReach(reachPx) / FRAME_W
+  return { start: reach, end: 1 - reach }
 }
 
 /** `#rrggbb` plus an alpha, for canvas stops and the matching CSS gradient. */

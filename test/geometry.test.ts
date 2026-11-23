@@ -10,6 +10,9 @@ import {
   guideRect,
   imageRect,
   normalizeDegrees,
+  REACH_GUIDE,
+  REACH_MAX,
+  clampReach,
   pinchStops,
   scaleToSlider,
   sliderToScale,
@@ -84,9 +87,21 @@ test('degrees normalize to a clockwise dial', () => {
 
 test('the pinch fades out exactly at the guide edges', () => {
   const { start, end } = pinchStops()
+  assert.equal(REACH_GUIDE, 305)
   assert.ok(Math.abs(start * 1280 - 305) < 1e-9)
   assert.ok(Math.abs(end * 1280 - 975) < 1e-9)
   assert.ok(start < 0.5 && end > 0.5)
+})
+
+test('the pinch reach is a distance from each edge and stops at the center', () => {
+  const short = pinchStops(100)
+  assert.ok(Math.abs(short.start * 1280 - 100) < 1e-9)
+  assert.ok(Math.abs(short.end * 1280 - 1180) < 1e-9)
+  const center = pinchStops(REACH_MAX + 80)
+  assert.equal(center.start, 0.5)
+  assert.equal(center.end, 0.5)
+  assert.equal(clampReach(Number.NaN), REACH_GUIDE)
+  assert.equal(clampReach(-20), 0)
 })
 
 test('gradient endpoints follow CSS angles', () => {

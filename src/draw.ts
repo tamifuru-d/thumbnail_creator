@@ -27,8 +27,10 @@ export interface Paint {
    * 90° pinches from the left (colorA) and the right (colorB).
    */
   angle: number
-  /** 0–1 strength of the side colors. 1 means the outer edges are fully that color. */
+  /** 0–1 opacity of the side colors. 1 means the outer edges are fully that color. */
   strength: number
+  /** How far the color reaches inward from each end, in px at 90°. */
+  reach: number
 }
 
 export function drawFrame(
@@ -58,7 +60,12 @@ export function drawFrame(
     ctx.restore()
   }
 
-  if (paint.mode === 'gradient' && paint.strength > 0 && Number.isFinite(paint.angle)) {
+  if (
+    paint.mode === 'gradient' &&
+    paint.strength > 0 &&
+    paint.reach > 0 &&
+    Number.isFinite(paint.angle)
+  ) {
     ctx.save()
     ctx.globalAlpha = Math.min(1, Math.max(0, paint.strength))
     fillSandwich(ctx, paint)
@@ -71,7 +78,7 @@ export function drawFrame(
 /** Color at both outer ends, fading to clear across the centered guide. */
 function fillSandwich(ctx: CanvasRenderingContext2D, paint: Paint): void {
   const { x0, y0, x1, y1 } = cssLinearGradientEnds(paint.angle, FRAME_W, FRAME_H)
-  const { start, end } = pinchStops()
+  const { start, end } = pinchStops(paint.reach)
   const gradient = ctx.createLinearGradient(x0, y0, x1, y1)
   gradient.addColorStop(0, paint.colorA)
   gradient.addColorStop(start, withAlpha(paint.colorA, 0))
